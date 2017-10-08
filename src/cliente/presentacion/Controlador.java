@@ -29,6 +29,11 @@ public class Controlador implements ActionListener, MouseMotionListener {
         JButton boton = (JButton) e.getSource();
         if (boton.equals(vista.getCrearSemaforos())) {
             System.out.println("crear semaforo");
+            vista.getModelo().pintarSemaforos();
+        }
+        if (boton.equals(vista.getBtnConectar())) {
+            System.out.println("conectar");
+            vista.getModelo().conectar();
         }
     }
 
