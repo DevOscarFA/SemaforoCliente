@@ -6,6 +6,8 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -24,7 +26,7 @@ public class Modelo implements Runnable {
     int cantidadSemaforosL1;
     int cantidadSemaforosL2;
     Socket SocketConeccion;
-    private static HiloEnviar hiloEnviar;
+    private ObjectOutputStream OutputStream;
 
     ArrayList<Semaforo> semaforoL1;
 
@@ -67,15 +69,22 @@ public class Modelo implements Runnable {
         int puertoString = Integer.parseInt(getVista().getTxtPuerto().getText());
         try {
             SocketConeccion = new Socket(InetAddress.getByName(ip), puertoString);
-            hiloEnviar = new HiloEnviar(SocketConeccion);
+            OutputStream = new ObjectOutputStream(SocketConeccion.getOutputStream());
             
             JSONObject j = new JSONObject();
-            j.put("numLineas", 2);
-            j.put("numBombRojasFund", 4);
-            j.put("numBombAmarillasFund", 15);
-            j.put("numBombVerdesFund", 65);
             
-            hiloEnviar.EnviarMensaje(j.toString());
+            j.put("numLineas", getVista().getCantidadSemaforosL1().getValue());
+            j.put("numBombRojasFund",  getVista().getCantidadSemaforosL1().getValue());
+            j.put("numBombAmarillasFund",  getVista().getCantidadSemaforosL1().getValue());
+            j.put("numBombVerdesFund",  getVista().getCantidadSemaforosL1().getValue());
+            
+            OutputStream.writeObject(j.toString());
+            OutputStream.flush();
+            ObjectInputStream ois = null;
+            ois = new ObjectInputStream(SocketConeccion.getInputStream());
+            
+            System.out.println(ois.readObject().toString());
+            
             
         } catch (Exception e) {
             System.out.println(e.getMessage());
