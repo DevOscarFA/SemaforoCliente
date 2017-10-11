@@ -4,7 +4,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JButton;
+import org.json.JSONException;
 
 /**
  * Controlador de la vista de semaforos
@@ -33,7 +37,15 @@ public class Controlador implements ActionListener, MouseMotionListener {
         }
         if (boton.equals(vista.getBtnConectar())) {
             System.out.println("conectar");
-            vista.getModelo().conectar();
+            try {
+                vista.getModelo().conectar();
+            } catch (JSONException ex) {
+                Logger.getLogger(Controlador.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IOException ex) {
+                Logger.getLogger(Controlador.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (ClassNotFoundException ex) {
+                Logger.getLogger(Controlador.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }
 
