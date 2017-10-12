@@ -1,32 +1,28 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package cliente.logica;
 
 import java.awt.Color;
 
 /**
- *
- * @author ce
+ * Modelo que comtrola las bombillas de los semaforos
  */
 public class Bombilla {
 
     private boolean funcionando;
     private Color colorActivo;
-    private Color colorInactivo;
+    private boolean activo;
     private int posInicialX;
     private int posInicialY;
     private int posFinalX;
     private int posFinalY;
 
+    //Creamos las bombillas con los valores enviados desde el semaforo
     Bombilla(int posIX, int posIY, int posFX, int posFY, Color color) {
         this.posInicialX = posIX;
         this.posInicialY = posIY;
         this.posFinalX = posFX;
         this.posFinalY = posFY;
         this.colorActivo = color;
+        this.activo = true;
     }
 
     public boolean isFuncionando() {
@@ -45,12 +41,12 @@ public class Bombilla {
         this.colorActivo = colorActivo;
     }
 
-    public Color getColorInactivo() {
-        return colorInactivo;
+    public boolean isActivo() {
+        return activo;
     }
 
-    public void setColorInactivo(Color colorInactivo) {
-        this.colorInactivo = colorInactivo;
+    public void setActivo(boolean activo) {
+        this.activo = activo;
     }
 
     public int getPosInicialX() {

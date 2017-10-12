@@ -4,8 +4,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 
 /**
- *
- * @author ce
+ * Clase que se encarga de crear los semaforos
  */
 public class Semaforo {
 
@@ -14,9 +13,9 @@ public class Semaforo {
     private int semsforoY;
     private boolean intermitente;
 
+    
+    //Creamos el semaforo y le añadimos los bombillos
     public Semaforo(int posX, int posY) {
-        int valIncremet = 0;
-
         listaBombillas = new ArrayList<Bombilla>();
         listaBombillas.add(new Bombilla(posX, posY, 20, 20, Color.RED));
         listaBombillas.add(new Bombilla(posX, (posY + 30), 20, 20, Color.YELLOW));

@@ -3,6 +3,7 @@ package cliente.presentacion;
 import cliente.logica.Bombilla;
 import cliente.logica.Semaforo;
 import java.awt.Canvas;
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -21,7 +22,7 @@ public class Modelo implements Runnable {
 
     private Vista Ventana;
     private Graphics canvasGraphics, bufferGraphics;
-    private Thread hiloDibujo;
+    private Thread hiloDibujo, conectar;
     private BufferedImage dobleBuffer;
     int cantidadSemaforosL1;
     int cantidadSemaforosL2;
@@ -29,20 +30,16 @@ public class Modelo implements Runnable {
     private ObjectOutputStream OutputStream;
     ArrayList<Semaforo> linea1;
     ArrayList<Semaforo> linea2;
-
     private boolean pintarSemaforos = false;
-
-    ArrayList<Semaforo> semaforoL1;
 
     public Modelo() {
         hiloDibujo = new Thread(this, "principal");
-
     }
 
     /**
      * Obtenemos la el objeto de la ventana
      *
-     * @return
+     * @return retorna la instancia de la vista
      */
     public Vista getVista() {
         if (Ventana == null) {
@@ -51,6 +48,9 @@ public class Modelo implements Runnable {
         return Ventana;
     }
 
+    /**
+     * Creamos la vista y damos inicio al hilo de dibujar
+     */
     public void iniciar() {
         Canvas canvasVista = getVista().getCanvas();
         dobleBuffer = new BufferedImage(canvasVista.getWidth(), canvasVista.getHeight(), BufferedImage.TYPE_INT_ARGB);
@@ -60,14 +60,15 @@ public class Modelo implements Runnable {
         hiloDibujo.start();
     }
 
+    /**
+     * Accion de pintar los semaforos
+     */
     public void pintarSemaforos() {
-
         crearSemaforo();
         pintarSemaforos = true;
     }
 
     public void conectar() throws JSONException, IOException, ClassNotFoundException {
-
         String ip = getVista().getTxtIP().getText();
         int puertoString = Integer.parseInt(getVista().getTxtPuerto().getText());
         try {
@@ -120,6 +121,14 @@ public class Modelo implements Runnable {
         while (true) {
             Dibujar();
         }
+    }
+
+    public void cambiarEstadoLinea1(int nivel, Color color) {
+        for (int i = 0; i < linea1.size(); i++) {
+            ArrayList<Bombilla> bombillo = linea1.get(i).getListaBombillas();
+            bombillo.get(nivel).setColorActivo(color);
+        }
+
     }
 
     private boolean Dibujar() {
