@@ -25,8 +25,8 @@ public class Controlador implements ActionListener, MouseMotionListener {
 
     /**
      * Escuchamos los eventos de click sobre los botones
-     * 
-     * @param e 
+     *
+     * @param e
      */
     @Override
     public void actionPerformed(ActionEvent e) {

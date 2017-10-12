@@ -1,8 +1,8 @@
 package cliente.presentacion;
 
+import cliente.logica.Bombilla;
 import cliente.logica.Semaforo;
 import java.awt.Canvas;
-import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -20,19 +20,23 @@ import org.json.JSONObject;
 public class Modelo implements Runnable {
 
     private Vista Ventana;
-    private Graphics vista, canvasGraphics, bufferGraphics;
-    private Thread hiloDibujo, conectar;
+    private Graphics canvasGraphics, bufferGraphics;
+    private Thread hiloDibujo;
     private BufferedImage dobleBuffer;
     int cantidadSemaforosL1;
     int cantidadSemaforosL2;
     Socket SocketConeccion;
     private ObjectOutputStream OutputStream;
+    ArrayList<Semaforo> linea1;
+    ArrayList<Semaforo> linea2;
+
+    private boolean pintarSemaforos = false;
 
     ArrayList<Semaforo> semaforoL1;
 
     public Modelo() {
         hiloDibujo = new Thread(this, "principal");
-        semaforoL1 = new ArrayList<Semaforo>();
+
     }
 
     /**
@@ -57,39 +61,58 @@ public class Modelo implements Runnable {
     }
 
     public void pintarSemaforos() {
-        cantidadSemaforosL1 = (int) getVista().getCantidadSemaforosL1().getValue();
-        cantidadSemaforosL2 = (int) getVista().getCantidadSemaforosL2().getValue();
-        System.out.println(cantidadSemaforosL1);
-        System.out.println(cantidadSemaforosL2);
 
+        crearSemaforo();
+        pintarSemaforos = true;
     }
 
     public void conectar() throws JSONException, IOException, ClassNotFoundException {
+
         String ip = getVista().getTxtIP().getText();
         int puertoString = Integer.parseInt(getVista().getTxtPuerto().getText());
         try {
             SocketConeccion = new Socket(InetAddress.getByName(ip), puertoString);
             OutputStream = new ObjectOutputStream(SocketConeccion.getOutputStream());
-            
+
             JSONObject j = new JSONObject();
-            
+
             j.put("numLineas", getVista().getCantidadSemaforosL1().getValue());
-            j.put("numBombRojasFund",  getVista().getCantidadSemaforosL1().getValue());
-            j.put("numBombAmarillasFund",  getVista().getCantidadSemaforosL1().getValue());
-            j.put("numBombVerdesFund",  getVista().getCantidadSemaforosL1().getValue());
-            
+            j.put("numBombRojasFund", getVista().getCantidadSemaforosL1().getValue());
+            j.put("numBombAmarillasFund", getVista().getCantidadSemaforosL1().getValue());
+            j.put("numBombVerdesFund", getVista().getCantidadSemaforosL1().getValue());
+
             OutputStream.writeObject(j.toString());
             OutputStream.flush();
             ObjectInputStream ois = null;
             ois = new ObjectInputStream(SocketConeccion.getInputStream());
-            
+
             System.out.println(ois.readObject().toString());
-            
-            
+
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
-        
+
+    }
+
+    public void crearSemaforo() {
+        cantidadSemaforosL1 = (int) getVista().getCantidadSemaforosL1().getValue();
+        cantidadSemaforosL2 = (int) getVista().getCantidadSemaforosL2().getValue();
+        int varXL1 = 0;
+        int varXL2 = 0;
+        this.linea1 = new ArrayList<Semaforo>();
+        this.linea2 = new ArrayList<Semaforo>();
+        for (int i = 0; i < cantidadSemaforosL1; i++) {
+
+            Semaforo sem = new Semaforo(varXL1, 0);
+            this.linea1.add(sem);
+            varXL1 = varXL1 + 40;
+        }
+
+        for (int i = 0; i < cantidadSemaforosL2; i++) {
+            this.linea2.add(new Semaforo(varXL2, 110));
+            varXL2 = varXL2 + 40;
+        }
+
     }
 
     @Override
@@ -99,41 +122,30 @@ public class Modelo implements Runnable {
         }
     }
 
-    
-
     private boolean Dibujar() {
-        int varXL1 = 0;
-        int varXL2 = 0;
+        if (pintarSemaforos == true) {
+            for (int i = 0; i < linea1.size(); i++) {
+                ArrayList<Bombilla> bombillas = linea1.get(i).getListaBombillas();
+                for (int j = 0; j < bombillas.size(); j++) {
+                    bufferGraphics.setColor(bombillas.get(j).getColorActivo());
+                    bufferGraphics.fillOval(bombillas.get(j).getPosInicialX(),
+                            bombillas.get(j).getPosInicialY(),
+                            bombillas.get(j).getPosFinalX(),
+                            bombillas.get(j).getPosFinalY());
+                }
+            }
+            for (int i = 0; i < linea2.size(); i++) {
+                ArrayList<Bombilla> bombillas = linea2.get(i).getListaBombillas();
+                for (int j = 0; j < bombillas.size(); j++) {
+                    bufferGraphics.setColor(bombillas.get(j).getColorActivo());
+                    bufferGraphics.fillOval(bombillas.get(j).getPosInicialX(),
+                            bombillas.get(j).getPosInicialY(),
+                            bombillas.get(j).getPosFinalX(),
+                            bombillas.get(j).getPosFinalY());
 
-        for (int i = 0; i < cantidadSemaforosL1; i++) {
-
-            bufferGraphics.setColor(new Color(44, 39, 39));
-            bufferGraphics.fillRect((varXL1 + 0), 0, 30, 90);
-
-            bufferGraphics.setColor(new Color(225, 80, 80));
-            bufferGraphics.fillOval((5 + varXL1), 5, 20, 20);
-            bufferGraphics.setColor(new Color(210, 225, 80));
-            bufferGraphics.fillOval((5 + varXL1), 35, 20, 20);
-            bufferGraphics.setColor(new Color(51, 179, 76));
-            bufferGraphics.fillOval((5 + varXL1), 65, 20, 20);
-
-            varXL1 = varXL1 + 40;
+                }
+            }
         }
-
-        for (int i = 0; i < cantidadSemaforosL2; i++) {
-
-            bufferGraphics.setColor(new Color(44, 39, 39));
-            bufferGraphics.fillRect((varXL2 + 0), 100, 30, 190);
-
-            bufferGraphics.setColor(new Color(225, 80, 80));
-            bufferGraphics.fillOval((5 + varXL2), 105, 20, 20);
-            bufferGraphics.setColor(new Color(210, 225, 80));
-            bufferGraphics.fillOval((5 + varXL2), 135, 20, 20);
-            bufferGraphics.setColor(new Color(51, 179, 76));
-            bufferGraphics.fillOval((5 + varXL2), 165, 20, 20);
-            varXL2 = varXL2 + 40;
-        }
-
         canvasGraphics.drawImage(dobleBuffer, 0, 0, getVista().getCanvas());
         return false;
     }
